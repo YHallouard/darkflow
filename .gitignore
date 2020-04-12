@@ -27,12 +27,6 @@ tfnet/yolo/*.parsed
 darkflow/cython_utils/*.pyd
 darkflow/cython_utils/*.c
 
-#egg-info
-darkflow.egg-info/
-
-#Other build stuff
-build/
-
 #TensorBoard logs
 summary/
 

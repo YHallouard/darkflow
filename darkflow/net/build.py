@@ -82,22 +82,24 @@ class TFNet(object):
 		with tf.gfile.FastGFile(self.FLAGS.pbLoad, "rb") as f:
 			graph_def = tf.GraphDef()
 			graph_def.ParseFromString(f.read())
-
+		print('step_2')
 		tf.import_graph_def(
 			graph_def,
 			name=""
 		)
+		print('step_3')
 		with open(self.FLAGS.metaLoad, 'r') as fp:
 			self.meta = json.load(fp)
-
+		print('step_4')
 		self.framework = create_framework(self.meta, self.FLAGS)
 
 		# Placeholders
 		self.inp = tf.get_default_graph().get_tensor_by_name('input:0')
 		self.feed = dict() # other placeholders
 		self.out = tf.get_default_graph().get_tensor_by_name('output:0')
-		
+		print('step_5')
 		self.setup_meta_ops()
+		print('step_6')
 	
 	def build_forward(self):
 		verbalise = self.FLAGS.verbalise

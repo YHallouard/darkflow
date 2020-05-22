@@ -79,9 +79,12 @@ class TFNet(object):
 	
 	def build_from_pb(self):
 		print('step_1')
-		with tf.gfile.FastGFile(self.FLAGS.pbLoad, "rb") as f:
-			graph_def = tf.GraphDef()
-			graph_def.ParseFromString(f.read())
+		try:
+			with tf.gfile.FastGFile(self.FLAGS.pbLoad, "rb") as f:
+				graph_def = tf.GraphDef()
+				graph_def.ParseFromString(f.read())
+		except IOError:
+			print('File not accessible')
 		print('step_2')
 		tf.import_graph_def(
 			graph_def,

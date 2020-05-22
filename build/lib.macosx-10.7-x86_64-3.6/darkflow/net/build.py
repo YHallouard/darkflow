@@ -78,16 +78,18 @@ class TFNet(object):
 			time.time() - start))
 	
 	def build_from_pb(self):
+		print('step_1')
 		with tf.gfile.FastGFile(self.FLAGS.pbLoad, "rb") as f:
 			graph_def = tf.GraphDef()
 			graph_def.ParseFromString(f.read())
-		
+
 		tf.import_graph_def(
 			graph_def,
 			name=""
 		)
 		with open(self.FLAGS.metaLoad, 'r') as fp:
 			self.meta = json.load(fp)
+
 		self.framework = create_framework(self.meta, self.FLAGS)
 
 		# Placeholders
@@ -109,12 +111,14 @@ class TFNet(object):
 		state = identity(self.inp)
 		roof = self.num_layer - self.ntrain
 		self.say(HEADER, LINE)
+
 		for i, layer in enumerate(self.darknet.layers):
 			scope = '{}-{}'.format(str(i),layer.type)
 			args = [layer, state, i, roof, self.feed]
 			state = op_create(*args)
 			mess = state.verbalise()
 			self.say(mess)
+
 		self.say(LINE)
 
 		self.top = state
@@ -127,6 +131,7 @@ class TFNet(object):
 		})
 
 		utility = min(self.FLAGS.gpu, 1.)
+
 		if utility > 0.0:
 			self.say('GPU mode with {} usage'.format(utility))
 			cfg['gpu_options'] = tf.GPUOptions(
@@ -137,11 +142,11 @@ class TFNet(object):
 			cfg['device_count'] = {'GPU': 0}
 
 		if self.FLAGS.train: self.build_train_op()
-		
+
 		if self.FLAGS.summary:
 			self.summary_op = tf.summary.merge_all()
 			self.writer = tf.summary.FileWriter(self.FLAGS.summary + 'train')
-		
+
 		self.sess = tf.Session(config = tf.ConfigProto(**cfg))
 		self.sess.run(tf.global_variables_initializer())
 
@@ -149,7 +154,7 @@ class TFNet(object):
 		self.saver = tf.train.Saver(tf.global_variables(), 
 			max_to_keep = self.FLAGS.keep)
 		if self.FLAGS.load != 0: self.load_from_ckpt()
-		
+
 		if self.FLAGS.summary:
 			self.writer.add_graph(self.sess.graph)
 

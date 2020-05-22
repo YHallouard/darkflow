@@ -79,32 +79,25 @@ class TFNet(object):
 	
 	def build_from_pb(self):
 		print('step_1')
-		try:
-			with tf.gfile.FastGFile(self.FLAGS.pbLoad, "rb") as f:
-				graph_def = tf.GraphDef()
-				graph_def.ParseFromString(f.read())
-		except IOError:
-			print('File not accessible')
-		print('step_2')
+		with tf.gfile.FastGFile(self.FLAGS.pbLoad, "rb") as f:
+			graph_def = tf.GraphDef()
+			graph_def.ParseFromString(f.read())
+
 		tf.import_graph_def(
 			graph_def,
 			name=""
 		)
-		print('step_3')
 		with open(self.FLAGS.metaLoad, 'r') as fp:
 			self.meta = json.load(fp)
-		print('step_4')
+
 		self.framework = create_framework(self.meta, self.FLAGS)
-		print('step_5')
+
 		# Placeholders
 		self.inp = tf.get_default_graph().get_tensor_by_name('input:0')
 		self.feed = dict() # other placeholders
 		self.out = tf.get_default_graph().get_tensor_by_name('output:0')
-
-		print('step_6')
 		
 		self.setup_meta_ops()
-		print('step_7_end_from_pb')
 	
 	def build_forward(self):
 		verbalise = self.FLAGS.verbalise
@@ -138,7 +131,7 @@ class TFNet(object):
 		})
 
 		utility = min(self.FLAGS.gpu, 1.)
-		print('setup_meta_ops_step_1')
+
 		if utility > 0.0:
 			self.say('GPU mode with {} usage'.format(utility))
 			cfg['gpu_options'] = tf.GPUOptions(
@@ -148,25 +141,20 @@ class TFNet(object):
 			self.say('Running entirely on CPU')
 			cfg['device_count'] = {'GPU': 0}
 
-		print('setup_meta_ops_step_2')
 		if self.FLAGS.train: self.build_train_op()
 
-		print('setup_meta_ops_step_3')
 		if self.FLAGS.summary:
 			self.summary_op = tf.summary.merge_all()
 			self.writer = tf.summary.FileWriter(self.FLAGS.summary + 'train')
 
-		print('setup_meta_ops_step_4')
 		self.sess = tf.Session(config = tf.ConfigProto(**cfg))
 		self.sess.run(tf.global_variables_initializer())
 
-		print('setup_meta_ops_step_5')
 		if not self.ntrain: return
 		self.saver = tf.train.Saver(tf.global_variables(), 
 			max_to_keep = self.FLAGS.keep)
 		if self.FLAGS.load != 0: self.load_from_ckpt()
 
-		print('setup_meta_ops_step_6')
 		if self.FLAGS.summary:
 			self.writer.add_graph(self.sess.graph)
 

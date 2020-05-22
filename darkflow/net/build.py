@@ -100,21 +100,31 @@ class TFNet(object):
 	def build_forward(self):
 		verbalise = self.FLAGS.verbalise
 
+		print('test_step_1')
+
 		# Placeholders
 		inp_size = [None] + self.meta['inp_size']
 		self.inp = tf.placeholder(tf.float32, inp_size, 'input')
 		self.feed = dict() # other placeholders
 
+		print('test_step_2')
+
 		# Build the forward pass
 		state = identity(self.inp)
 		roof = self.num_layer - self.ntrain
 		self.say(HEADER, LINE)
+
+		print('test_step_3')
+
 		for i, layer in enumerate(self.darknet.layers):
 			scope = '{}-{}'.format(str(i),layer.type)
 			args = [layer, state, i, roof, self.feed]
 			state = op_create(*args)
 			mess = state.verbalise()
 			self.say(mess)
+
+			print(f'test_step_4_{i}')
+
 		self.say(LINE)
 
 		self.top = state
